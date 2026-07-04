@@ -8,7 +8,7 @@ const router = express.Router();
 
 const COOKIE_OPTS = {
   httpOnly: true,
-  sameSite: "lax",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   secure: process.env.NODE_ENV === "production",
   maxAge: 8 * 60 * 60 * 1000, // 8 hours
 };
@@ -48,7 +48,11 @@ router.post("/login", async (req, res) => {
 });
 
 router.post("/logout", (req, res) => {
-  res.clearCookie("gatepass_token");
+  res.clearCookie("gatepass_token", {
+    httpOnly: COOKIE_OPTS.httpOnly,
+    sameSite: COOKIE_OPTS.sameSite,
+    secure: COOKIE_OPTS.secure,
+  });
   res.json({ ok: true });
 });
 
