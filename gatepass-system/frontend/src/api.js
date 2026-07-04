@@ -32,3 +32,9 @@ export const api = {
     return res.blob();
   },
 };
+
+// For plain <img src="..."> tags, which don't go through fetch() at all and
+// so need the full absolute URL spelled out directly in the markup.
+export function apiUrl(path) {
+  return `${BASE}${path}`;
+}

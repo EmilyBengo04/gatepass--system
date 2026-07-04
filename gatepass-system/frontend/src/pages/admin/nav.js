@@ -1,4 +1,4 @@
-import { DashboardIcon, PeopleIcon, ActivityIcon, SettingsIcon, ReportIcon, BuildingIcon } from "../../components/icons";
+import { DashboardIcon, PeopleIcon, ActivityIcon, SettingsIcon, ReportIcon, BuildingIcon, QrIcon } from "../../components/icons";
 
 export const ADMIN_NAV_ITEMS = [
   { to: "/admin", label: "Overview", icon: DashboardIcon },
@@ -7,4 +7,5 @@ export const ADMIN_NAV_ITEMS = [
   { to: "/admin/users", label: "User accounts", icon: SettingsIcon },
   { to: "/admin/logs", label: "Activity log", icon: ActivityIcon },
   { to: "/admin/reports", label: "Reports", icon: ReportIcon },
+  { to: "/admin/qrcodes", label: "Gate QR codes", icon: QrIcon },
 ];

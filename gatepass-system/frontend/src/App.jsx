@@ -14,6 +14,7 @@ import AdminOfficers from "./pages/admin/AdminOfficers";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminLogs from "./pages/admin/AdminLogs";
 import AdminReports from "./pages/admin/AdminReports";
+import AdminQrCodes from "./pages/admin/AdminQrCodes";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
@@ -36,6 +37,7 @@ export default function App() {
       <Route path="/admin/users" element={<ProtectedRoute roles={["admin"]}><AdminUsers /></ProtectedRoute>} />
       <Route path="/admin/logs" element={<ProtectedRoute roles={["admin"]}><AdminLogs /></ProtectedRoute>} />
       <Route path="/admin/reports" element={<ProtectedRoute roles={["admin"]}><AdminReports /></ProtectedRoute>} />
+      <Route path="/admin/qrcodes" element={<ProtectedRoute roles={["admin"]}><AdminQrCodes /></ProtectedRoute>} />
     </Routes>
   );
 }

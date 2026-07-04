@@ -69,6 +69,16 @@ export function ReportIcon({ className }) {
   );
 }
 
+export function QrIcon({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className}>
+      <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.6" />
+      <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.6" />
+      <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M14 15h3m4 0h0M14 19h7M18 15v7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
 export function SignOutArrowIcon({ className }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className}>
