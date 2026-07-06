@@ -1,8 +1,9 @@
 const express = require("express");
+const createRouter = require("../utils/router");
 const pool = require("../db");
 const { sendHostNotification } = require("../utils/mailer");
 
-const router = express.Router();
+const router = createRouter();
 
 // Public (kiosk): register a visitor's arrival, notify the host by email
 router.post("/signin", async (req, res) => {
@@ -13,13 +14,18 @@ router.post("/signin", async (req, res) => {
   }
 
   const client = await pool.connect();
+  let visitLogId, timeIn, host;
+
   try {
     const { rows: hostRows } = await client.query(
       "SELECT id, name, email, department FROM employees WHERE id = $1 AND active = TRUE",
       [host_employee_id]
     );
-    const host = hostRows[0];
-    if (!host) return res.status(404).json({ error: "Selected host could not be found." });
+    host = hostRows[0];
+    if (!host) {
+      client.release();
+      return res.status(404).json({ error: "Selected host could not be found." });
+    }
 
     await client.query("BEGIN");
     const { rows: visitRows } = await client.query(
@@ -28,8 +34,8 @@ router.post("/signin", async (req, res) => {
        RETURNING id, time_in`,
       [name, phone, email || null, host_employee_id, purpose || null]
     );
-    const visitLogId = visitRows[0].id;
-    const timeIn = visitRows[0].time_in;
+    visitLogId = visitRows[0].id;
+    timeIn = visitRows[0].time_in;
 
     for (const asset of assets) {
       if (!asset.identifier) continue;
@@ -40,11 +46,22 @@ router.post("/signin", async (req, res) => {
       );
     }
     await client.query("COMMIT");
+  } catch (err) {
+    await client.query("ROLLBACK").catch(() => {});
+    console.error("Visitor sign-in failed before commit:", err);
+    client.release();
+    return res.status(500).json({ error: "Could not complete visitor sign-in. Please try again." });
+  }
+  client.release();
 
-    // Notify the host — outside the transaction so a slow/failed email never
-    // rolls back a successful sign-in.
-    let notifyStatus = "skipped";
-    if (host.email) {
+  // The sign-in itself is already saved at this point — everything below is
+  // best-effort. If notifying the host fails (bad SMTP config, a slow DNS
+  // lookup, whatever), the visitor should still see a success message
+  // rather than a false error telling them to retry (which previously could
+  // even create a duplicate sign-in if they retried after a real success).
+  let notifyStatus = "skipped";
+  if (host.email) {
+    try {
       const result = await sendHostNotification({
         to: host.email,
         hostName: host.name,
@@ -58,16 +75,13 @@ router.post("/signin", async (req, res) => {
          VALUES ($1, 'email', $2, $3, $4, CASE WHEN $3 = 'sent' THEN now() ELSE NULL END)`,
         [visitLogId, host.email, result.status, result.error || null]
       );
+    } catch (err) {
+      console.error("Host notification failed (visitor is still signed in fine):", err);
+      notifyStatus = "failed";
     }
-
-    res.status(201).json({ visitLogId, timeIn, host: { name: host.name, department: host.department }, notifyStatus });
-  } catch (err) {
-    await client.query("ROLLBACK");
-    console.error(err);
-    res.status(500).json({ error: "Could not complete visitor sign-in. Please try again." });
-  } finally {
-    client.release();
   }
+
+  res.status(201).json({ visitLogId, timeIn, host: { name: host.name, department: host.department }, notifyStatus });
 });
 
 module.exports = router;

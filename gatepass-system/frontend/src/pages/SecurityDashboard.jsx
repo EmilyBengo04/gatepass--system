@@ -4,6 +4,7 @@ import StatCard from "../components/StatCard";
 import { api } from "../api";
 import { PeopleIcon, VisitorIcon, SignOutArrowIcon } from "../components/icons";
 import { NAV_ITEMS } from "./security/nav";
+import AssetBadges from "../components/AssetBadges";
 
 function initials(name = "") {
   return name.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
@@ -105,6 +106,7 @@ export default function SecurityDashboard() {
                       <div>
                         <p className="text-sm font-medium text-ink-900">{r.person_name}</p>
                         <p className="text-xs text-ink-500">{r.department || r.host_name}</p>
+                        <AssetBadges assets={r.assets} />
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -141,6 +143,7 @@ export default function SecurityDashboard() {
                     <div>
                       <p className="text-sm font-medium text-ink-900">{v.person_name}</p>
                       <p className="text-xs text-ink-500">{v.department || `Visiting ${v.host_name}`}</p>
+                      <AssetBadges assets={v.assets} />
                     </div>
                   </div>
                   <div className="flex items-center gap-2">

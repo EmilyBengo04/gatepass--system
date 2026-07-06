@@ -1,9 +1,10 @@
 const express = require("express");
+const createRouter = require("../utils/router");
 const bcrypt = require("bcryptjs");
 const pool = require("../db");
 const { requireAuth } = require("../middleware/auth");
 
-const router = express.Router();
+const router = createRouter();
 router.use(requireAuth("admin"));
 
 // Full activity log, filterable by date / department / person, with the
@@ -17,15 +18,25 @@ router.get("/logs", async (req, res) => {
        COALESCE(e.department, host.department) AS department,
        host.name AS host_name,
        in_officer.name AS signed_in_by,
-       out_officer.name AS signed_out_by
+       out_officer.name AS signed_out_by,
+       COALESCE(
+         json_agg(
+           json_build_object(
+             'id', a.id, 'category', a.category, 'ownership', a.ownership,
+             'identifier', a.identifier, 'returnedConfirmed', a.returned_confirmed, 'mismatch', a.mismatch
+           )
+         ) FILTER (WHERE a.id IS NOT NULL), '[]'
+       ) AS assets
      FROM visit_logs vl
      LEFT JOIN employees e ON e.id = vl.employee_id
      LEFT JOIN employees host ON host.id = vl.host_employee_id
      LEFT JOIN users in_officer ON in_officer.id = vl.signed_in_by
      LEFT JOIN users out_officer ON out_officer.id = vl.signed_out_by
+     LEFT JOIN assets a ON a.visit_log_id = vl.id
      WHERE ($1::date IS NULL OR vl.time_in::date = $1::date)
        AND ($2::text IS NULL OR COALESCE(e.department, host.department) ILIKE '%' || $2 || '%')
        AND ($3::text IS NULL OR vl.visitor_type = $3)
+     GROUP BY vl.id, e.name, e.department, host.name, host.department, in_officer.name, out_officer.name
      ORDER BY vl.time_in DESC
      LIMIT 500`,
     [date || null, department || null, personType || null]
@@ -45,7 +56,7 @@ router.get("/officer-activity", async (req, res) => {
      FROM users u
      LEFT JOIN visit_logs vl_in ON vl_in.signed_in_by = u.id AND vl_in.time_in::date = $1::date
      LEFT JOIN visit_logs vl_out ON vl_out.signed_out_by = u.id AND vl_out.time_out::date = $1::date
-     WHERE u.role IN ('security', 'admin')
+     WHERE u.role IN ('security', 'admin') AND u.active = TRUE
      GROUP BY u.id, u.name, u.role
      ORDER BY u.name`,
     [targetDate]

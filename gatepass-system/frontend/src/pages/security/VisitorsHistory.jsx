@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Sidebar from "../../components/Sidebar";
 import { NAV_ITEMS } from "./nav";
 import { api } from "../../api";
+import AssetBadges from "../../components/AssetBadges";
 
 export default function VisitorsHistory() {
   const [history, setHistory] = useState([]);
@@ -24,6 +25,7 @@ export default function VisitorsHistory() {
                 <th className="px-4 py-3 font-medium">Name</th>
                 <th className="px-4 py-3 font-medium">Visiting</th>
                 <th className="px-4 py-3 font-medium">Purpose</th>
+                <th className="px-4 py-3 font-medium">Assets</th>
                 <th className="px-4 py-3 font-medium">Time in</th>
                 <th className="px-4 py-3 font-medium">Time out</th>
               </tr>
@@ -34,12 +36,13 @@ export default function VisitorsHistory() {
                   <td className="px-4 py-3 font-medium text-ink-900">{h.person_name}</td>
                   <td className="px-4 py-3 text-ink-700">{h.host_name}</td>
                   <td className="px-4 py-3 text-ink-700">{h.purpose || "—"}</td>
+                  <td className="px-4 py-3"><AssetBadges assets={h.assets} /></td>
                   <td className="px-4 py-3 text-ink-500">{new Date(h.time_in).toLocaleString()}</td>
                   <td className="px-4 py-3 text-ink-500">{h.time_out ? new Date(h.time_out).toLocaleString() : "Still in"}</td>
                 </tr>
               ))}
               {history.length === 0 && (
-                <tr><td colSpan={5} className="px-4 py-6 text-center text-ink-500">No visitor records yet.</td></tr>
+                <tr><td colSpan={6} className="px-4 py-6 text-center text-ink-500">No visitor records yet.</td></tr>
               )}
             </tbody>
           </table>

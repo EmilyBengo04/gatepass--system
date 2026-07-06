@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Sidebar from "../../components/Sidebar";
 import { ADMIN_NAV_ITEMS } from "./nav";
 import { api } from "../../api";
+import AssetBadges from "../../components/AssetBadges";
 
 export default function AdminLogs() {
   const [logs, setLogs] = useState([]);
@@ -38,6 +39,7 @@ export default function AdminLogs() {
               <tr>
                 <th className="px-4 py-3 font-medium">Person</th>
                 <th className="px-4 py-3 font-medium">Type</th>
+                <th className="px-4 py-3 font-medium">Assets</th>
                 <th className="px-4 py-3 font-medium">Time in</th>
                 <th className="px-4 py-3 font-medium">Time out</th>
                 <th className="px-4 py-3 font-medium">Signed in by</th>
@@ -49,6 +51,7 @@ export default function AdminLogs() {
                 <tr key={l.id}>
                   <td className="px-4 py-3 font-medium text-ink-900">{l.person_name}</td>
                   <td className="px-4 py-3 capitalize text-ink-700">{l.visitor_type}</td>
+                  <td className="px-4 py-3"><AssetBadges assets={l.assets} /></td>
                   <td className="px-4 py-3 text-ink-500">{new Date(l.time_in).toLocaleString()}</td>
                   <td className="px-4 py-3 text-ink-500">{l.time_out ? new Date(l.time_out).toLocaleString() : "—"}</td>
                   <td className="px-4 py-3 text-ink-500">{l.signed_in_by || "Self-service kiosk"}</td>
@@ -56,7 +59,7 @@ export default function AdminLogs() {
                 </tr>
               ))}
               {logs.length === 0 && (
-                <tr><td colSpan={6} className="px-4 py-6 text-center text-ink-500">No records match these filters.</td></tr>
+                <tr><td colSpan={7} className="px-4 py-6 text-center text-ink-500">No records match these filters.</td></tr>
               )}
             </tbody>
           </table>

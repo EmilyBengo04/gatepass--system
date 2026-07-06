@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Sidebar from "../../components/Sidebar";
 import { NAV_ITEMS } from "./nav";
 import { api } from "../../api";
+import AssetBadges from "../../components/AssetBadges";
 
 export default function ActivityLog() {
   const [history, setHistory] = useState([]);
@@ -35,6 +36,7 @@ export default function ActivityLog() {
               <tr>
                 <th className="px-4 py-3 font-medium">Person</th>
                 <th className="px-4 py-3 font-medium">Type</th>
+                <th className="px-4 py-3 font-medium">Assets</th>
                 <th className="px-4 py-3 font-medium">Time in</th>
                 <th className="px-4 py-3 font-medium">Time out</th>
                 <th className="px-4 py-3 font-medium">Status</th>
@@ -45,6 +47,7 @@ export default function ActivityLog() {
                 <tr key={h.id}>
                   <td className="px-4 py-3 font-medium text-ink-900">{h.person_name}</td>
                   <td className="px-4 py-3 capitalize text-ink-700">{h.visitor_type}</td>
+                  <td className="px-4 py-3"><AssetBadges assets={h.assets} /></td>
                   <td className="px-4 py-3 text-ink-500">{new Date(h.time_in).toLocaleString()}</td>
                   <td className="px-4 py-3 text-ink-500">{h.time_out ? new Date(h.time_out).toLocaleString() : "—"}</td>
                   <td className="px-4 py-3">
@@ -55,7 +58,7 @@ export default function ActivityLog() {
                 </tr>
               ))}
               {history.length === 0 && (
-                <tr><td colSpan={5} className="px-4 py-6 text-center text-ink-500">No activity for this date.</td></tr>
+                <tr><td colSpan={6} className="px-4 py-6 text-center text-ink-500">No activity for this date.</td></tr>
               )}
             </tbody>
           </table>
